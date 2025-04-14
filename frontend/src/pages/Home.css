@@ -1,0 +1,49 @@
+.home-container {
+  text-align: center;
+  color: white;
+  min-height: 100vh;
+}
+
+.hostel-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.hostel-logo img {
+  width: 100%;
+  height: auto;
+  opacity: 80%;
+}
+
+.welcome-heading {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translate(-75%, -30%);
+  z-index: 2;
+  font-size: 4rem;
+  padding: 10px 20px;
+  border-radius: 10px;
+}
+
+.info-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  margin-top: 40px;
+  padding: 0 10%;
+  flex-wrap: wrap; /* makes it responsive on smaller screens */
+}
+
+
+.about-us, .notifications {
+  margin-top: 40px;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.about-us p {
+ font-size: 1rem;
+}
