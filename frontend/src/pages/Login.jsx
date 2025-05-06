@@ -1,32 +1,62 @@
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import './Auth.css';
 
 const Login = () => {
-    const [role, setRole] = useState('Warden');
+    const [role, setRole] = useState('warden');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
-
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        // TODO: Make API call for login
-        console.log('Logging in:', { role, email, password });
-        navigate('/')
-    }
 
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json',
+                },
+                body: JSON.stringify({ role, email, password })
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Login failed');
+            }
+
+            const data = await res.json();
+            const { token, user } = data; // Assume token and user info is returned
+
+            // Store token and role in localStorage or sessionStorage
+            localStorage.setItem('token', token);
+            localStorage.setItem('role', role); // Assuming role is returned with user info
+
+            // Redirect based on role
+            if (role === "warden") {
+                navigate('/warden-dashboard');
+            } else if (role === 'prefect') {
+                navigate('/prefect-dashboard');
+            } else if (role === 'wing representative') {
+                navigate('/wing-representative-dashboard');
+            } else {
+                navigate('/');
+            }
+
+        } catch (err) {
+            console.error('Login error:', err.message);
+            alert(err.message); 
+        }
+    }
 
     return (
         <div className="auth-container">
             <h2>Login</h2>
             <form onSubmit={handleLogin}>
-
-                <select value={role} onChange={(e) => { setRole(e.target.value) }}>
-                    <option value="Warden">Warden</option>
-                    <option value="Prefect">Prefect</option>
-                    <option value="Wing Representatives">Wing Representatives</option>
-
+                <select value={role} onChange={(e) => setRole(e.target.value)}>
+                    <option value="warden">Warden</option>
+                    <option value="prefect">Prefect</option>
+                    <option value="wing representative">Wing Representative</option>
                 </select>
 
                 <input
@@ -34,21 +64,21 @@ const Login = () => {
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required />
+                    required
+                />
 
                 <input
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required />
+                    required
+                />
 
                 <button type="submit">Login</button>
-
             </form>
-        </div >
-    )
-
-}
+        </div>
+    );
+};
 
 export default Login;

@@ -1,4 +1,7 @@
 # Hostel-Information-System
+DROP DATABASE MiniProject;
+CREATE DATABASE MiniProject;
+USE MiniProject;
 
 -- 1. ROOM
 CREATE TABLE rooms (
@@ -92,4 +95,13 @@ CREATE TABLE notifications (
   FOREIGN KEY (lost_item_id) REFERENCES lost_items(lost_item_id)
     ON UPDATE CASCADE
     ON DELETE SET NULL
+);
+
+-- 8. USERS
+CREATE TABLE users (
+  user_id   INT AUTO_INCREMENT PRIMARY KEY,
+  name      VARCHAR(100)       NOT NULL,
+  email     VARCHAR(100)       NOT NULL UNIQUE,
+  password  VARCHAR(255)       NOT NULL, -- store hashed password
+  role      ENUM('warden', 'prefect', 'wing representatives') 
 );
