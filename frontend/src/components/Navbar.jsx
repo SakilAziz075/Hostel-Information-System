@@ -16,6 +16,7 @@ const Navbar= () =>{
                 <li><a href="#">Gallery</a></li>
                 <li><a href="#">Facilities</a></li>
                 <li><a href="#">Contact Us</a></li>
+                <li><a href="/submit-complaint">Complaints</a></li>
                 <li><a href="/login">Login</a></li>
 
             </ul>
