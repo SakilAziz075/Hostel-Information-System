@@ -105,3 +105,15 @@ CREATE TABLE users (
   password  VARCHAR(255)       NOT NULL, -- store hashed password
   role      ENUM('warden', 'prefect', 'wing representatives') 
 );
+
+-- 9. WINGS
+CREATE TABLE wings (
+  wing_id           INT AUTO_INCREMENT PRIMARY KEY,
+  wing_name         VARCHAR(50)       NOT NULL UNIQUE,
+  representative_id INT,  -- references a student
+  room_start        VARCHAR(10)       NOT NULL,
+  room_end          VARCHAR(10)       NOT NULL,
+  FOREIGN KEY (representative_id) REFERENCES students(student_id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+);

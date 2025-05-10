@@ -1,0 +1,98 @@
+{
+    "rooms": [
+      { "room_id": 1, "room_number": "A101", "capacity": 2, "current_occupants": 1 },
+      { "room_id": 2, "room_number": "A102", "capacity": 2, "current_occupants": 2 }
+    ],
+    "students": [
+      { "student_id": 1, "name": "Alice Sharma", "email": "alice@example.com", "contact_number": "9876543210", "room_id": 1 },
+      { "student_id": 2, "name": "Bob Thomas", "email": "bob@example.com", "contact_number": "9876543211", "room_id": 2 },
+      { "student_id": 3, "name": "Carol D'Souza", "email": "carol@example.com", "contact_number": "9876543212", "room_id": 2 }
+    ],
+    "complaints": [
+      {
+        "complaint_id": 1,
+        "student_id": 1,
+        "category": "electrical",
+        "description": "Tube light flickering",
+        "submitted_at": "2025-05-01T09:30:00",
+        "status": "Pending",
+        "priority": "Medium"
+      },
+      {
+        "complaint_id": 2,
+        "student_id": 2,
+        "category": "plumbing",
+        "description": "Leaking tap in bathroom",
+        "submitted_at": "2025-04-28T17:45:00",
+        "status": "Resolved",
+        "priority": "High"
+      }
+    ],
+    "assets": [
+      {
+        "asset_id": 1,
+        "type": "Fan",
+        "location": "Room A101",
+        "current_condition": "Operational",
+        "purchase_date": "2022-01-15",
+        "replacement_date": null
+      },
+      {
+        "asset_id": 2,
+        "type": "Water Heater",
+        "location": "Bathroom Block 2",
+        "current_condition": "Needs Repair",
+        "purchase_date": "2021-09-10",
+        "replacement_date": null
+      }
+    ],
+    "maintenance_logs": [
+      {
+        "log_id": 1,
+        "asset_id": 2,
+        "requested_by": 3,
+        "request_date": "2025-04-25T10:00:00",
+        "status": "In Progress",
+        "notes": "Requested technician visit"
+      }
+    ],
+    "lost_items": [
+      {
+        "lost_item_id": 1,
+        "student_id": 1,
+        "item_description": "Red Umbrella",
+        "incident_date": "2025-05-02T12:00:00",
+        "status": "Lost"
+      }
+    ],
+    "notifications": [
+      {
+        "notification_id": 1,
+        "recipient_id": 1,
+        "lost_item_id": 1,
+        "message_content": "Your lost item 'Red Umbrella' has been found at reception.",
+        "created_at": "2025-05-03T09:00:00",
+        "is_read": false
+      }
+    ],
+    "users": [
+      {
+        "user_id": 1,
+        "name": "Warden Rajesh",
+        "email": "warden@example.com",
+        "password": "hashedpassword123",
+        "role": "warden"
+      }
+    ],
+
+    "wings": [
+      {
+        "wing_id": 1,
+        "wing_name": "A-Wing",
+        "representative_id": 2,
+        "room_start": "101",
+        "room_end": "110"
+      }
+    ]
+  }
+  
