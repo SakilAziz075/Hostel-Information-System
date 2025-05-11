@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import '../pages/WardenDashboard.css';
+import WingManagement from '../components/WingManagement';
+import ComplaintManagement from '../components/ComplaintManagement';
+import BoarderList from '../components/BoarderList';
+import RoomManagement from '../components/RoomManagement';
+
+
+
+
+
 
 const WardenDashboard = () => {
     const [activeSection, setActiveSection] = useState('complaints');
@@ -21,7 +30,7 @@ const WardenDashboard = () => {
             .then(setStudents)
             .catch(err => console.error('Error loading students', err));
 
-        fetch('/api/complaints')
+            fetch('http://localhost:5000/api/complaints')
             .then(res => res.json())
             .then(setComplaints)
             .catch(err => console.error('Error loading complaints', err));
@@ -93,96 +102,25 @@ const WardenDashboard = () => {
             {/* Conditional Content */}
             <div className="dashboard-content">
                 {activeSection === 'complaints' && (
-                    <section>
-                        <h3>Complaint Management</h3>
-                        <h4>Current Issues</h4>
-                        <ul>
-                            {currentIssues.map(issue => (
-                                <li key={issue.complaint_id}>
-                                    #{issue.complaint_id} - {issue.category}: {issue.description} ({issue.status})
-                                </li>
-                            ))}
-                        </ul>
-                        <h4>Resolved Issues</h4>
-                        <ul>
-                            {resolvedIssues.map(issue => (
-                                <li key={issue.complaint_id}>
-                                    #{issue.complaint_id} - {issue.category}: {issue.description}
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
+                    <ComplaintManagement complaints={complaints} />
                 )}
 
-                {activeSection === 'rooms' && (
-                    <section>
-                        <h3>Room Management</h3>
-                        <p>Room allotment and room change request functionality coming soon.</p>
-                    </section>
-                )}
+                {activeSection === 'rooms' && <RoomManagement />}
+
 
                 {activeSection === 'boarders' && (
-                    <section>
-                        <h3>Boarders List</h3>
-                        <ul>
-                            {students.map(student => (
-                                <li key={student.student_id}>
-                                    {student.name} - {student.email} (Room ID: {student.room_id})
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
+                    <BoarderList students={students} />
                 )}
 
                 {activeSection === 'wings' && (
-                    <section>
-                        <h3>Wing Management</h3>
-
-                        <form onSubmit={handleSubmit} className="wing-form">
-                            <input
-                                type="text"
-                                name="wing_name"
-                                value={newWing.wing_name}
-                                onChange={handleChange}
-                                placeholder="Wing Name"
-                                required
-                            />
-                            <input
-                                type="text"
-                                name="representative_id"
-                                value={newWing.representative_id}
-                                onChange={handleChange}
-                                placeholder="Representative ID"
-                                required
-                            />
-                            <input
-                                type="text"
-                                name="room_start"
-                                value={newWing.room_start}
-                                onChange={handleChange}
-                                placeholder="Start Room"
-                                required
-                            />
-                            <input
-                                type="text"
-                                name="room_end"
-                                value={newWing.room_end}
-                                onChange={handleChange}
-                                placeholder="End Room"
-                                required
-                            />
-                            <button type="submit">{editWingId ? 'Update Wing' : 'Add Wing'}</button>
-                        </form>
-
-                        <ul>
-                            {wings.map(wing => (
-                                <li key={wing.wing_id}>
-                                    <strong>{wing.wing_name}</strong> | Rep ID: {wing.representative_id} | Rooms: {wing.room_start} - {wing.room_end}
-                                    <button onClick={() => handleEdit(wing)}>Edit</button>
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
+                    <WingManagement
+                        wings={wings}
+                        newWing={newWing}
+                        editWingId={editWingId}
+                        onChange={handleChange}
+                        onSubmit={handleSubmit}
+                        onEdit={handleEdit}
+                    />
                 )}
             </div>
         </div>

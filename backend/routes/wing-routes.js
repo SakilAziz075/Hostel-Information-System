@@ -1,6 +1,7 @@
 import { Router } from 'express';
-const router = Router();
 import { getAllWings, createWing, updateWing } from '../controllers/wing-controller.js';
+
+const router = Router();
 
 router.get('/', getAllWings);
 router.post('/', createWing);
