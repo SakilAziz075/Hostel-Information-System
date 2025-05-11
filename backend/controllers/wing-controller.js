@@ -6,44 +6,42 @@ export function getAllWings(req, res) {
             res.json(results);
         })
         .catch(err => {
-            console.error("Error fetching wings:", err);  // Add detailed logging
+            console.error("Error fetching wings:", err);
             res.status(500).json({ error: err.message });
         });
 }
 
 export function createWing(req, res) {
-    const { wing_name, representative_id, room_start, room_end } = req.body;
+    let { wing_name, representative_id, room_start, room_end } = req.body;
 
-    console.log("Received data:", { wing_name, representative_id, room_start, room_end });  // Add data logging
+    console.log("Received data:", { wing_name, representative_id, room_start, room_end });
 
-    // First, insert the new wing into the wings table
-    db.query('INSERT INTO wings (wing_name, representative_id, room_start, room_end) VALUES (?, ?, ?, ?)',
-        [wing_name, representative_id, room_start, room_end])
-        .then(([result]) => {
-            const wing_id = result.insertId;
-            console.log("Wing created with wing_id:", wing_id);  // Log the wing_id
+    // Convert empty string to null for representative_id
+    if (representative_id === '') {
+        representative_id = null;
+    }
 
-            // Once the wing is added, we update the rooms table
-            // Create an array of rooms with wing_id, room_number, and capacity
-            const roomsToAdd = [];
-            for (let i = parseInt(room_start); i <= parseInt(room_end); i++) {
-                roomsToAdd.push([wing_id, i, 2]);  // Assuming capacity = 2 for all rooms
-            }
+    db.query(
+        'INSERT INTO wings (wing_name, representative_id, room_start, room_end) VALUES (?, ?, ?, ?)',
+        [wing_name, representative_id, room_start, room_end]
+    )
+    .then(([result]) => {
+        console.log("Wing created with wing_id:", result.insertId);
 
-            // Insert rooms into the rooms table with capacity
-            return db.query('INSERT INTO rooms (wing_id, room_number, capacity) VALUES ?', [roomsToAdd]);
+        const roomsToAdd = [];
+        for (let i = parseInt(room_start); i <= parseInt(room_end); i++) {
+            roomsToAdd.push([String(i), 2]);  // room_number as VARCHAR
+        }
 
-
-            // Insert rooms into the rooms table
-            return db.query('INSERT INTO rooms (wing_id, room_number) VALUES ?', [roomsToAdd]);
-        })
-        .then(() => {
-            res.status(201).json({ message: 'Wing and rooms created successfully' });
-        })
-        .catch(err => {
-            console.error("Error creating wing:", err);  // Add error logging
-            res.status(500).json({ error: err.message });
-        });
+        return db.query('INSERT INTO rooms (room_number, capacity) VALUES ?', [roomsToAdd]);
+    })
+    .then(() => {
+        res.status(201).json({ message: 'Wing and rooms created successfully' });
+    })
+    .catch(err => {
+        console.error("Error creating wing:", err);
+        res.status(500).json({ error: err.message });
+    });
 }
 
 export function updateWing(req, res) {
@@ -56,7 +54,7 @@ export function updateWing(req, res) {
             res.json({ message: 'Wing updated successfully' });
         })
         .catch(err => {
-            console.error("Error updating wing:", err);  // Add error logging
+            console.error("Error updating wing:", err);
             res.status(500).json({ error: err.message });
         });
 }

@@ -4,11 +4,7 @@ import WingManagement from '../components/WingManagement';
 import ComplaintManagement from '../components/ComplaintManagement';
 import BoarderList from '../components/BoarderList';
 import RoomManagement from '../components/RoomManagement';
-
-
-
-
-
+import axios from 'axios';
 
 const WardenDashboard = () => {
     const [activeSection, setActiveSection] = useState('complaints');
@@ -23,24 +19,19 @@ const WardenDashboard = () => {
     });
     const [editWingId, setEditWingId] = useState(null);
 
-    // Fetch students and complaints (replace this with real APIs if needed)
     useEffect(() => {
-        fetch('/api/students')
-            .then(res => res.json())
-            .then(setStudents)
+        axios.get('/api/students')
+            .then(res => setStudents(res.data))
             .catch(err => console.error('Error loading students', err));
 
-            fetch('http://localhost:5000/api/complaints')
-            .then(res => res.json())
-            .then(setComplaints)
+        axios.get('http://localhost:5000/api/complaints')
+            .then(res => setComplaints(res.data))
             .catch(err => console.error('Error loading complaints', err));
     }, []);
 
-    // Fetch wings
     useEffect(() => {
-        fetch('/api/wings')
-            .then(res => res.json())
-            .then(setWings)
+        axios.get('/api/wings')
+            .then(res => setWings(res.data))
             .catch(err => console.error('Error loading wings', err));
     }, []);
 
@@ -57,19 +48,16 @@ const WardenDashboard = () => {
         const url = editWingId ? `/api/wings/${editWingId}` : '/api/wings';
 
         try {
-            const res = await fetch(url, {
+            await axios({
                 method,
+                url,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newWing)
+                data: newWing
             });
 
-            if (!res.ok) throw new Error('Failed to save wing');
+            const updated = await axios.get('/api/wings');
+            setWings(updated.data);
 
-            // Refresh wings
-            const updated = await fetch('/api/wings').then(r => r.json());
-            setWings(updated);
-
-            // Reset form
             setNewWing({ wing_name: '', representative_id: '', room_start: '', room_end: '' });
             setEditWingId(null);
         } catch (err) {
@@ -87,11 +75,58 @@ const WardenDashboard = () => {
         });
     };
 
+    // ✅ NEW: Boarder Handlers
+    const handleAddBoarder = async (boarder) => {
+        try {
+            await axios.post('/api/boarders/add', boarder);
+            const updated = await axios.get('/api/students');
+            setStudents(updated.data);
+        } catch (err) {
+            console.error('Error adding boarder:', err);
+        }
+    };
+
+    const handleRemoveBoarder = async (student_id) => {
+        try {
+            await axios.delete(`/api/boarders/remove/${student_id}`);
+            setStudents(prev => prev.filter(b => b.student_id !== student_id));
+        } catch (err) {
+            console.error('Error removing boarder:', err);
+        }
+    };
+
+    const handleUpdateBoarder = async (student_id) => {
+        const updatedData = prompt("Enter updated boarder data (JSON format)");
+        try {
+            const data = JSON.parse(updatedData);
+            await axios.put(`/api/boarders/update/${student_id}`, data);
+            setStudents(prev =>
+                prev.map(b => (b.student_id === student_id ? { ...b, ...data } : b))
+            );
+        } catch (err) {
+            alert('Invalid data or failed to update boarder');
+        }
+    };
+
+    const handleUploadSheet = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            await axios.post('/api/boarders/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const updated = await axios.get('/api/students');
+            setStudents(updated.data);
+        } catch (err) {
+            console.error('Error uploading spreadsheet:', err);
+        }
+    };
+
     return (
         <div className="warden-dashboard">
             <h2>Welcome, Warden!</h2>
 
-            {/* Sidebar Menu */}
             <nav className="dashboard-nav">
                 <button onClick={() => setActiveSection('complaints')}>Complaint Management</button>
                 <button onClick={() => setActiveSection('rooms')}>Room Management</button>
@@ -99,7 +134,6 @@ const WardenDashboard = () => {
                 <button onClick={() => setActiveSection('wings')}>Wing Management</button>
             </nav>
 
-            {/* Conditional Content */}
             <div className="dashboard-content">
                 {activeSection === 'complaints' && (
                     <ComplaintManagement complaints={complaints} />
@@ -107,9 +141,14 @@ const WardenDashboard = () => {
 
                 {activeSection === 'rooms' && <RoomManagement />}
 
-
                 {activeSection === 'boarders' && (
-                    <BoarderList students={students} />
+                    <BoarderList
+                        students={students}
+                        onAdd={handleAddBoarder}
+                        onRemove={handleRemoveBoarder}
+                        onUpdate={handleUpdateBoarder}
+                        onUpload={handleUploadSheet}
+                    />
                 )}
 
                 {activeSection === 'wings' && (

@@ -35,12 +35,16 @@ CREATE TABLE complaints (
 
   -- Escalation fields
   approval_status  ENUM('Pending', 'Approved', 'Rejected')  NOT NULL DEFAULT 'Pending',
-  assigned_to      ENUM('wing', 'prefect', 'warden')        NOT NULL DEFAULT 'wing',
+  assigned_to      VARCHAR(20)           NOT NULL,  -- Changed to student_id to reference the assigned person
 
   FOREIGN KEY (student_id) REFERENCES students(student_id)
     ON UPDATE CASCADE
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  FOREIGN KEY (assigned_to) REFERENCES students(student_id)  -- Add this foreign key to reference the assigned person
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT
 );
+
 
 
 -- 4. ASSETS

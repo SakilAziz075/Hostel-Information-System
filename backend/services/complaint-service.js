@@ -3,20 +3,35 @@ import db from '../config/db.js';
 
 // Submit a new complaint
 async function submitComplaint({ student_id, category, description, priority }) {
-    const [studentCheck] = await db.query('SELECT student_id FROM students WHERE student_id = ?', [student_id]);
+    // Check if student exists
+    const [studentCheck] = await db.query('SELECT student_id, room_number FROM students WHERE student_id = ?', [student_id]);
     if (!studentCheck.length) {
         const err = new Error('Student not found');
         err.status = 404;
         throw err;
     }
 
+    const roomNumber = studentCheck[0].room_number;
+
+    // Get the wing information based on the room number
+    const [wingInfo] = await db.query('SELECT wing_name, representative_id FROM wings WHERE room_start <= ? AND room_end >= ?', [roomNumber, roomNumber]);
+    if (!wingInfo.length) {
+        const err = new Error('Wing representative not found for the room');
+        err.status = 404;
+        throw err;
+    }
+
+    const assignedTo = wingInfo[0].representative_id; // Assign the wing rep
+
+    // Insert complaint into the database
     const [result] = await db.query(
         'INSERT INTO complaints (student_id, category, description, priority, approval_status, assigned_to) VALUES (?, ?, ?, ?, ?, ?)',
-        [student_id, category, description, priority, 'Pending', 'wing']
+        [student_id, category, description, priority, 'Pending', assignedTo]
     );
 
     return { complaint_id: result.insertId, message: 'Complaint submitted successfully!' };
 }
+
 
 // Update status (used by Warden or Prefect, once complaint is escalated)
 async function updateComplaintStatus(complaintId, status) {

@@ -28,7 +28,7 @@ const WingManagement = ({
                     value={newWing.representative_id}
                     onChange={onChange}
                     placeholder="Representative ID"
-                    required
+                    // required
                 />
                 <input
                     type="text"

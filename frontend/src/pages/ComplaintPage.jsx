@@ -35,7 +35,7 @@ const SubmitComplaintPage = () => {
     e.preventDefault();
 
     try {
-      await axios.post('http://localhost:5000/api/auth/complaint', formData);
+      await axios.post('http://localhost:5000/api/complaints/', formData);
       alert('Complaint submitted successfully!');
       setFormData({
         student_id: '',
@@ -56,7 +56,7 @@ const SubmitComplaintPage = () => {
         <label>
           Student ID:
           <input
-            type="number"
+            // type="number"
             name="student_id"
             value={formData.student_id}
             onChange={handleChange}
