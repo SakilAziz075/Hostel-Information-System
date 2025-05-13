@@ -62,17 +62,24 @@ export const addPrefect = async (req, res) => {
 
 
 // Remove a prefect
-export const removePrefect = (req, res) => {
+export const removePrefect = async (req, res) => {
     const { user_id } = req.params;
 
-    db.query('UPDATE users SET role = NULL WHERE user_id = ?', [user_id], (err) => {
-        if (err) {
-            console.error('Error removing prefect:', err);
-            return res.status(500).json({ error: 'Failed to remove prefect' });
+    try {
+        const [result] = await db.query('DELETE FROM users WHERE user_id = ?', [user_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Prefect not found' });
         }
-        res.status(200).json({ message: 'Prefect removed successfully' });
-    });
+
+        return res.status(200).json({ message: 'Prefect removed successfully' });
+    } catch (err) {
+        console.error('Error removing prefect:', err);
+        return res.status(500).json({ error: 'Failed to remove prefect' });
+    }
 };
+
+
 
 // Update prefect details (optional, could be for updating a floor or additional info)
 export const updatePrefect = (req, res) => {
