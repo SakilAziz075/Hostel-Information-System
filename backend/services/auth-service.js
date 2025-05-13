@@ -46,11 +46,22 @@ async function login({ email, password, role }) {
         throw err;
     }
 
-    // Generate JWT token with user details
-    const token = sign({ sub: user.user_id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    let student_id = null;
+    if (role !== 'warden') {
+        // Fetch student_id for complaint-related roles
+        const [studentRows] = await db.query('SELECT student_id FROM students WHERE email = ?', [email]);
+        if (!studentRows.length) {
+            const err = new Error('Student record not found');
+            err.status = 404;
+            throw err;
+        }
+        student_id = studentRows[0].student_id;
+    }
 
-    // Return token, role, and any other necessary info (such as user id)
-    return { token, role: user.role, expiresIn: JWT_EXPIRES_IN };
+    const token = sign({ sub: user.user_id, role: user.role, student_id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+
+    return { token, role: user.role, student_id, expiresIn: JWT_EXPIRES_IN };
 }
+
 
 export default { register, login };

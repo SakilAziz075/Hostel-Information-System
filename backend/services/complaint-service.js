@@ -12,9 +12,14 @@ async function submitComplaint({ student_id, category, description, priority }) 
     }
 
     const roomNumber = studentCheck[0].room_number;
+    console.log(`Student room number: ${roomNumber}`);
 
     // Get the wing information based on the room number
     const [wingInfo] = await db.query('SELECT wing_name, representative_id FROM wings WHERE room_start <= ? AND room_end >= ?', [roomNumber, roomNumber]);
+
+    // Log the retrieved wing info
+    console.log('Wing info:', wingInfo);
+
     if (!wingInfo.length) {
         const err = new Error('Wing representative not found for the room');
         err.status = 404;
@@ -22,6 +27,7 @@ async function submitComplaint({ student_id, category, description, priority }) 
     }
 
     const assignedTo = wingInfo[0].representative_id; // Assign the wing rep
+    console.log(`Complaint assigned to representative: ${assignedTo}`);
 
     // Insert complaint into the database
     const [result] = await db.query(
@@ -31,6 +37,7 @@ async function submitComplaint({ student_id, category, description, priority }) 
 
     return { complaint_id: result.insertId, message: 'Complaint submitted successfully!' };
 }
+
 
 
 // Update status (used by Warden or Prefect, once complaint is escalated)
@@ -80,8 +87,8 @@ async function getAllComplaints() {
     return rows;
 }
 
-// Process complaint (approve or reject) and escalate if approved
-async function processComplaint(complaintId, role, action) {
+
+async function processComplaint(complaintId, role, action, currentUserId) {
     const [[complaint]] = await db.query('SELECT * FROM complaints WHERE complaint_id = ?', [complaintId]);
 
     if (!complaint) {
@@ -90,7 +97,7 @@ async function processComplaint(complaintId, role, action) {
         throw err;
     }
 
-    if (complaint.assigned_to !== role) {
+    if (complaint.assigned_to !== currentUserId) {
         const err = new Error(`You are not authorized to process this complaint.`);
         err.status = 403;
         throw err;
@@ -99,21 +106,37 @@ async function processComplaint(complaintId, role, action) {
     if (action === 'Rejected') {
         await db.query(
             'UPDATE complaints SET approval_status = ?, assigned_to = ? WHERE complaint_id = ?',
-            ['Rejected', role, complaintId]
+            ['Rejected', currentUserId, complaintId]
         );
         return { message: 'Complaint rejected.' };
     }
 
-    // If approved, escalate or finally approve
-    const nextRole = role === 'wing' ? 'prefect' : role === 'prefect' ? 'warden' : null;
-    const approvalStatus = nextRole ? 'Pending' : 'Approved';
+    // Get the next level user (prefect or warden) from the users table
+    const roleMap = {
+        wing: 'prefect',
+        prefect: 'warden',
+    };
+
+    const nextRole = roleMap[role];
+
+    let nextAssignee = null;
+
+    if (nextRole) {
+        const [users] = await db.query('SELECT student_id FROM students JOIN users ON students.email = users.email WHERE role = ?', [nextRole]);
+        if (!users.length) {
+            throw new Error(`No ${nextRole} found in the system.`);
+        }
+        nextAssignee = users[0].student_id;
+    }
+
+    const approvalStatus = nextAssignee ? 'Pending' : 'Approved';
 
     await db.query(
         'UPDATE complaints SET approval_status = ?, assigned_to = ? WHERE complaint_id = ?',
-        [approvalStatus, nextRole || role, complaintId]
+        [approvalStatus, nextAssignee || currentUserId, complaintId]
     );
 
-    return { message: `Complaint ${nextRole ? 'escalated to ' + nextRole : 'fully approved'} successfully.` };
+    return { message: `Complaint ${nextAssignee ? 'escalated to ' + nextRole : 'fully approved'} successfully.` };
 }
 
 export default {

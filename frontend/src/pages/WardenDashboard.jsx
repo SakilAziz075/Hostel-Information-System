@@ -4,6 +4,7 @@ import WingManagement from '../components/WingManagement';
 import ComplaintManagement from '../components/ComplaintManagement';
 import BoarderList from '../components/BoarderList';
 import RoomManagement from '../components/RoomManagement';
+import PrefectManagement from '../components/PrefectManagement'; // ✅ NEW Import
 import axios from 'axios';
 
 const WardenDashboard = () => {
@@ -75,7 +76,6 @@ const WardenDashboard = () => {
         });
     };
 
-    // ✅ NEW: Boarder Handlers
     const handleAddBoarder = async (boarder) => {
         try {
             await axios.post('/api/boarders/add', boarder);
@@ -132,6 +132,7 @@ const WardenDashboard = () => {
                 <button onClick={() => setActiveSection('rooms')}>Room Management</button>
                 <button onClick={() => setActiveSection('boarders')}>Boarders List</button>
                 <button onClick={() => setActiveSection('wings')}>Wing Management</button>
+                <button onClick={() => setActiveSection('prefects')}>Prefect Management</button> {/* ✅ Added */}
             </nav>
 
             <div className="dashboard-content">
@@ -160,6 +161,10 @@ const WardenDashboard = () => {
                         onSubmit={handleSubmit}
                         onEdit={handleEdit}
                     />
+                )}
+
+                {activeSection === 'prefects' && (
+                    <PrefectManagement />
                 )}
             </div>
         </div>

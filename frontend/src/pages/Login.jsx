@@ -26,18 +26,21 @@ const Login = () => {
             }
 
             const data = await res.json();
-            const { token, user } = data; // Assume token and user info is returned
-
-            // Store token and role in localStorage or sessionStorage
+            const { token, role: userRole, student_id } = data;
+            
             localStorage.setItem('token', token);
-            localStorage.setItem('role', role); // Assuming role is returned with user info
+            localStorage.setItem('role', userRole);
+            if (student_id) {
+                localStorage.setItem('student_id', student_id);
+            }
+            
 
             // Redirect based on role
             if (role === "warden") {
                 navigate('/warden-dashboard');
             } else if (role === 'prefect') {
                 navigate('/prefect-dashboard');
-            } else if (role === 'wing representative') {
+            } else if (role === 'wing representatives') {
                 navigate('/wing-representative-dashboard');
             } else {
                 navigate('/');
@@ -56,7 +59,7 @@ const Login = () => {
                 <select value={role} onChange={(e) => setRole(e.target.value)}>
                     <option value="warden">Warden</option>
                     <option value="prefect">Prefect</option>
-                    <option value="wing representative">Wing Representative</option>
+                    <option value="wing representatives">Wing Representative</option>
                 </select>
 
                 <input

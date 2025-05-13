@@ -55,7 +55,7 @@ export async function getAllComplaints(req, res) {
 // Process (approve/reject) complaint and escalate if necessary
 export async function processComplaint(req, res) {
     const complaintId = req.params.id;
-    const { role, action } = req.body;
+    const { role, action, student_id } = req.body;
 
     if (!role || !['wing', 'prefect', 'warden'].includes(role)) {
         return res.status(400).json({ message: 'Invalid role.' });
@@ -66,7 +66,7 @@ export async function processComplaint(req, res) {
     }
 
     try {
-        const result = await complaintService.processComplaint(complaintId, role, action);
+        const result = await complaintService.processComplaint(complaintId, role, action, student_id);
         return res.status(200).json(result);
     } catch (error) {
         console.error('Error processing complaint:', error);

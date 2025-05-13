@@ -20,6 +20,7 @@ export const updateBoarder = async (req, res) => {
         res.status(200).json({ message: 'Boarder updated successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
+        console.error(error)
     }
 };
 
