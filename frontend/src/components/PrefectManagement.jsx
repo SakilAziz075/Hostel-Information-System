@@ -23,8 +23,6 @@ const PrefectManagement = () => {
         if (!studentIdInput.trim()) return;
 
         try {
-            console.log('firing add prefect');
-            
             await axios.post('/api/prefects/add-prefect', {
                 student_id: studentIdInput.trim()
             });
@@ -59,20 +57,34 @@ const PrefectManagement = () => {
                 <button onClick={handleAddPrefect}>Add Prefect</button>
             </div>
 
-            <ul>
-                {prefects.length === 0 ? (
-                    <p>No prefects assigned yet.</p>
-                ) : (
-                    prefects.map(prefect => (
-                        <li key={prefect.user_id}>
-                            {prefect.name} ({prefect.student_id})
-                            <button onClick={() => handleRemovePrefect(prefect.user_id)} style={{ marginLeft: '10px' }}>
-                                Remove
-                            </button>
-                        </li>
-                    ))
-                )}
-            </ul>
+            {prefects.length === 0 ? (
+                <p>No prefects assigned yet.</p>
+            ) : (
+                <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse' }}>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {prefects.map(prefect => (
+                            <tr key={prefect.user_id}>
+                                <td>{prefect.name}</td>
+                                <td>{prefect.email}</td>
+                                <td>{prefect.role}</td>
+                                <td>
+                                    <button onClick={() => handleRemovePrefect(prefect.user_id)}>
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 };
