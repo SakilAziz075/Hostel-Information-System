@@ -139,9 +139,77 @@ async function processComplaint(complaintId, role, action, currentUserId) {
     return { message: `Complaint ${nextAssignee ? 'escalated to ' + nextRole : 'fully approved'} successfully.` };
 }
 
+// In complaint-service.js
+
+// Escalate complaint to warden
+async function escalateToWarden(complaintId) {
+    const [[complaint]] = await db.query('SELECT * FROM complaints WHERE complaint_id = ?', [complaintId]);
+
+    if (!complaint) {
+        const err = new Error('Complaint not found');
+        err.status = 404;
+        throw err;
+    }
+    console.log(complaint)
+
+    // Insert into warden_complaints table
+    const [result] = await db.query(
+        'INSERT INTO warden_complaints (complaint_id, student_id, category, description, priority) VALUES (?, ?, ?, ?, ?)',
+        [complaintId, complaint.student_id, complaint.category, complaint.description, complaint.priority]
+    );
+
+    return { warden_complaint_id: result.insertId, message: 'Complaint escalated to warden.' };
+}
+
+async function addWardenLog(wardenComplaintId, update_text) {
+    const [result] = await db.query(
+        'INSERT INTO complaint_logs (warden_complaint_id, update_text) VALUES (?, ?)',
+        [wardenComplaintId, update_text]
+    );
+
+    return { log_id: result.insertId, message: 'Progress update added successfully.' };
+}
+
+
+// Get all warden complaints
+async function getAllWardenComplaints() {
+    const [rows] = await db.query(`
+        SELECT 
+            wc.warden_complaint_id,
+            wc.complaint_id,
+            wc.category,
+            wc.description,
+            wc.status,
+            wc.priority,
+            wc.submitted_at,
+            wc.action_taken,
+            s.name AS student_name,
+            s.email AS student_email,
+            s.student_id AS student_roll
+        FROM warden_complaints wc
+        JOIN students s ON wc.student_id = s.student_id
+        ORDER BY wc.submitted_at DESC
+    `);
+
+    return rows;
+}
+
+async function getWardenLogs(wardenComplaintId) {
+    const [logs] = await db.query(
+        'SELECT log_id, update_text, updated_at FROM complaint_logs WHERE warden_complaint_id = ? ORDER BY updated_at DESC',
+        [wardenComplaintId]
+    );
+    return logs;
+}
+
+
 export default {
     submitComplaint,
     updateComplaintStatus,
     getAllComplaints,
     processComplaint,
+    escalateToWarden,
+    addWardenLog,
+    getAllWardenComplaints,
+    getWardenLogs
 };

@@ -1,0 +1,65 @@
+.warden-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 1rem;
+    font-family: Arial, sans-serif;
+}
+
+.warden-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.complaint-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: #f9f9f9;
+}
+
+.log-button,
+.submit-button {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #0366d6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.log-button:hover,
+.submit-button:hover {
+    background-color: #0257b2;
+}
+
+.log-textarea {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    resize: vertical;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.logs-container {
+    margin-top: 0.75rem;
+    padding-left: 1rem;
+}
+
+.log-entry {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.log-time {
+    font-size: 0.8rem;
+    color: gray;
+}
+
+.log-status {
+    margin-top: 0.5rem;
+    color: green;
+    font-size: 0.9rem;
+}

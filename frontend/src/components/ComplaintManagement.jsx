@@ -1,65 +1,115 @@
-// components/ComplaintManagement.jsx
 import React, { useEffect, useState } from 'react';
+import './ComplaintManagement.css';
 
-const ComplaintManagement = ({ complaints }) => {
-    const [localComplaints, setLocalComplaints] = useState(complaints);
+const WardenComplaintManagement = () => {
+    const [complaints, setComplaints] = useState([]);
+    const [logs, setLogs] = useState({});
+    const [newLog, setNewLog] = useState({});
+    const [loadingLogs, setLoadingLogs] = useState({});
+    const [logStatus, setLogStatus] = useState({});
 
-    const updateStatus = async (id, status) => {
+    useEffect(() => {
+        fetch('/api/complaints/warden')  // Updated API endpoint for all warden complaints
+            .then(res => res.json())
+            .then(setComplaints)
+            .catch(err => console.error('Failed to fetch complaints:', err));
+    }, []);
+
+    const fetchLogs = async (id) => {
+        setLoadingLogs(prev => ({ ...prev, [id]: true }));
         try {
-            const res = await fetch(`/api/complaints/${id}/status`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
-            });
-
-            if (!res.ok) throw new Error('Failed to update status');
-
-            // Refresh list locally
-            const updated = localComplaints.map(c =>
-                c.complaint_id === id ? { ...c, status } : c
-            );
-            setLocalComplaints(updated);
+            const res = await fetch(`/api/complaints/${id}/logs`);  // Updated endpoint for fetching logs
+            const data = await res.json();
+            setLogs(prev => ({ ...prev, [id]: data }));
         } catch (err) {
-            console.error(err);
+            console.error('Failed to fetch logs:', err);
+        } finally {
+            setLoadingLogs(prev => ({ ...prev, [id]: false }));
         }
     };
 
-    const statuses = ['Pending', 'Approved', 'In Progress', 'Resolved'];
+    const submitLog = async (id) => {
+        const text = newLog[id]?.trim();
+        if (!text) return;
+
+        try {
+            const res = await fetch(`/api/complaints/${id}/logs`, {
+                // Updated endpoint for submitting log
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ update_text: text })
+            });
+
+            if (res.ok) {
+                await fetchLogs(id);
+                setNewLog(prev => ({ ...prev, [id]: '' }));
+                setLogStatus(prev => ({ ...prev, [id]: '✅ Update added.' }));
+            } else {
+                const err = await res.json();
+                setLogStatus(prev => ({ ...prev, [id]: err.message || 'Failed to add update.' }));
+            }
+        } catch (err) {
+            console.error('Submit error:', err);
+            setLogStatus(prev => ({ ...prev, [id]: '❌ Error submitting update.' }));
+        }
+
+        setTimeout(() => {
+            setLogStatus(prev => ({ ...prev, [id]: '' }));
+        }, 3000);
+    };
 
     return (
-        <div>
-            <h3>Complaints</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-                {localComplaints.map(c => (
-                    <li key={c.complaint_id} style={{ marginBottom: '1rem', padding: '0.5rem', border: '1px solid #ccc' }}>
-                        <strong>{c.category}</strong> - {c.description}
-                        <div>
-                            Current Status: <strong>{c.status}</strong>
-                        </div>
-                        <div style={{ marginTop: '0.5rem' }}>
-                            {statuses.map(status => (
-                                <button
-                                    key={status}
-                                    onClick={() => updateStatus(c.complaint_id, status)}
-                                    style={{
-                                        marginRight: '0.5rem',
-                                        padding: '0.3rem 0.6rem',
-                                        backgroundColor: c.status === status ? '#4caf50' : '#e0e0e0',
-                                        color: c.status === status ? 'white' : 'black',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    {status}
-                                </button>
-                            ))}
-                        </div>
-                    </li>
-                ))}
-            </ul>
+        <div className="warden-container">
+            <h2 className="warden-title">Warden Complaints</h2>
+            {complaints.length === 0 ? (
+                <p>No complaints found.</p>
+            ) : complaints.map(c => (
+                <div key={c.complaint_id} className="complaint-card">
+                    <h4><strong>Category: </strong>{c.category}</h4>
+                    <p>{c.description}</p>
+                    <p><strong>Priority:</strong> {c.priority}</p>
+                    <p><strong>Student:</strong> {c.student_name} ({c.student_roll})</p> {/* 👈 Add this line */}
+
+                    <button className="log-button" onClick={() => fetchLogs(c.warden_complaint_id)}>
+                        {loadingLogs[c.warden_complaint_id] ? 'Loading logs...' : 'Show Logs'}
+                    </button>
+
+                    <div className="logs-container">
+                        {loadingLogs[c.warden_complaint_id] ? null : (
+                            logs.hasOwnProperty(c.warden_complaint_id) ? (
+                                logs[c.warden_complaint_id].length > 0 ? (
+                                    logs[c.warden_complaint_id].map(log => (
+                                        <div key={`${c.warden_complaint_id}-${log.log_id}`} className="log-entry">
+                                            📍 <em>{log.update_text}</em> <span className="log-time">({new Date(log.updated_at).toLocaleString()})</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>No logs yet.</p>
+                                )
+                            ) : null
+                        )}
+                    </div>
+
+
+                    <textarea
+                        rows="2"
+                        placeholder="Add progress update..."
+                        className="log-textarea"
+                        value={newLog[c.warden_complaint_id] || ''}
+                        onChange={e => setNewLog(prev => ({ ...prev, [c.warden_complaint_id]: e.target.value }))}
+                    ></textarea>
+
+                    <button className="submit-button" onClick={() => submitLog(c.warden_complaint_id)}>
+                        Add Update
+                    </button>
+
+                    {logStatus[c.complaint_id] && (
+                        <p className="log-status">{logStatus[c.complaint_id]}</p>
+                    )}
+                </div>
+            ))}
         </div>
     );
 };
 
-export default ComplaintManagement;
+export default WardenComplaintManagement;

@@ -4,6 +4,7 @@ import WingManagement from '../components/WingManagement';
 import ComplaintManagement from '../components/ComplaintManagement';
 import BoarderList from '../components/BoarderList';
 import RoomManagement from '../components/RoomManagement';
+import PrefectComplaintManagement from '../components/PrefectComplaintManagement'; // Import new component
 import axios from 'axios';
 
 const PrefectDashboard = () => {
@@ -119,6 +120,19 @@ const PrefectDashboard = () => {
         }
     };
 
+    // Handle forwarding to warden and resolving complaints in the parent
+    const handleForwardToWarden = (complaintId) => {
+        setComplaints(prev => prev.map(c => 
+            c.complaint_id === complaintId ? { ...c, status: 'Escalated to Warden' } : c
+        ));
+    };
+
+    const handleResolveComplaint = (complaintId) => {
+        setComplaints(prev => prev.map(c => 
+            c.complaint_id === complaintId ? { ...c, status: 'Resolved' } : c
+        ));
+    };
+
     return (
         <div className="warden-dashboard">
             <h2>Welcome, Prefect!</h2>
@@ -132,7 +146,11 @@ const PrefectDashboard = () => {
 
             <div className="dashboard-content">
                 {activeSection === 'complaints' && (
-                    <ComplaintManagement complaints={complaints} />
+                    <PrefectComplaintManagement
+                        complaints={complaints}
+                        onForwardToWarden={handleForwardToWarden}
+                        onResolveComplaint={handleResolveComplaint}
+                    />
                 )}
 
                 {activeSection === 'rooms' && <RoomManagement />}

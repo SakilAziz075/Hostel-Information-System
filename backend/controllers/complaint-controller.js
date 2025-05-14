@@ -73,3 +73,55 @@ export async function processComplaint(req, res) {
         return res.status(error.status || 500).json({ message: error.message || 'Internal server error' });
     }
 }
+
+// Escalate complaint to warden
+export async function escalateComplaint(req, res) {
+    const complaintId = req.params.id;
+
+    try {
+        const result = await complaintService.escalateToWarden(complaintId);
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error('Error escalating complaint:', error);
+        return res.status(error.status || 500).json({ message: error.message || 'Internal server error' });
+    }
+}
+
+export async function addWardenLog(req, res) {
+    const { id: wardenComplaintId } = req.params;
+    const { update_text } = req.body;
+
+    if (!update_text) {
+        return res.status(400).json({ message: 'Update text is required.' });
+    }
+
+    try {
+        const result = await complaintService.addWardenLog(wardenComplaintId, update_text);
+        return res.status(201).json(result);
+    } catch (error) {
+        console.error('Error adding log:', error);
+        return res.status(500).json({ message: error.message || 'Failed to add progress update' });
+    }
+}
+
+export async function getWardenLogs(req, res) {
+    const { id: wardenComplaintId } = req.params;
+
+    try {
+        const logs = await complaintService.getWardenLogs(wardenComplaintId);
+        return res.status(200).json(logs);
+    } catch (error) {
+        console.error('Error fetching logs:', error);
+        return res.status(500).json({ message: 'Failed to fetch logs.' });
+    }
+}
+
+export async function getAllWardenComplaints(req, res) {
+    try {
+        const complaints = await complaintService.getAllWardenComplaints();
+        res.status(200).json(complaints);
+    } catch (error) {
+        console.error('Error fetching warden complaints:', error);
+        res.status(500).json({ message: 'Server error while retrieving warden complaints' });
+    }
+}

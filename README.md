@@ -122,3 +122,34 @@ CREATE TABLE wings (
     ON UPDATE CASCADE
     ON DELETE SET NULL
 );
+
+
+--10. WARDEN COMPLAINT TABLE
+CREATE TABLE warden_complaints (
+  warden_complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+  complaint_id        INT NOT NULL,  -- References the original complaint
+  student_id          VARCHAR(20) NOT NULL,  -- Roll number of the student who filed the complaint
+  category            ENUM('electrical', 'plumbing', 'internet', 'furniture', 'sanitation') NOT NULL,
+  description         TEXT,
+  submitted_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status              ENUM('Pending', 'In Progress', 'Resolved') NOT NULL DEFAULT 'Pending',
+  priority            ENUM('Low', 'Medium', 'High', 'Critical') NOT NULL DEFAULT 'Low',
+  action_taken        TEXT,  -- Optional field for any actions taken by the warden
+  FOREIGN KEY (complaint_id) REFERENCES complaints(complaint_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  FOREIGN KEY (student_id) REFERENCES students(student_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+
+-- 11. TO SEE PROGRESS
+
+CREATE TABLE complaint_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    warden_complaint_id INT,
+    update_text TEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (warden_complaint_id) REFERENCES warden_complaints(warden_complaint_id) ON DELETE CASCADE
+);
