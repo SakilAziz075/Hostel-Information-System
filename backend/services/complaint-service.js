@@ -50,6 +50,7 @@ async function updateComplaintStatus(complaintId, status) {
         throw err;
     }
 
+    // Update complaint status
     const [result] = await db.query(
         'UPDATE complaints SET status = ? WHERE complaint_id = ?',
         [status, complaintId]
@@ -61,8 +62,17 @@ async function updateComplaintStatus(complaintId, status) {
         throw err;
     }
 
-    return { message: 'Complaint status updated successfully.' };
+    // Update warden_complaint status if complaint is escalated to warden
+    if (status === 'In Progress' || status === 'Resolved') {
+        await db.query(
+            'UPDATE warden_complaints SET status = ? WHERE complaint_id = ?',
+            [status, complaintId]
+        );
+    }
+
+    return { message: 'Complaint and warden complaint status updated successfully.' };
 }
+
 
 // Get all complaints
 async function getAllComplaints() {
@@ -111,9 +121,17 @@ async function processComplaint(complaintId, role, action, currentUserId) {
         return { message: 'Complaint rejected.' };
     }
 
-    // Get the next level user (prefect or warden) from the users table
+    // ✅ If wing rep approves, do NOT escalate — just mark in progress
+    if (role === 'wing' && action === 'Approved') {
+        await db.query(
+            'UPDATE complaints SET approval_status = ?, status = ? WHERE complaint_id = ?',
+            ['Approved', 'In Progress', complaintId]
+        );
+        return { message: 'Complaint approved by wing representative and marked as In Progress.' };
+    }
+
+    // For roles above wing (e.g. prefect -> escalate to warden)
     const roleMap = {
-        wing: 'prefect',
         prefect: 'warden',
     };
 
@@ -139,6 +157,7 @@ async function processComplaint(complaintId, role, action, currentUserId) {
     return { message: `Complaint ${nextAssignee ? 'escalated to ' + nextRole : 'fully approved'} successfully.` };
 }
 
+
 // In complaint-service.js
 
 // Escalate complaint to warden
@@ -150,7 +169,6 @@ async function escalateToWarden(complaintId) {
         err.status = 404;
         throw err;
     }
-    console.log(complaint)
 
     // Insert into warden_complaints table
     const [result] = await db.query(
@@ -158,17 +176,36 @@ async function escalateToWarden(complaintId) {
         [complaintId, complaint.student_id, complaint.category, complaint.description, complaint.priority]
     );
 
+    // Sync status between complaints and warden_complaints
+    await db.query(
+        'UPDATE complaints SET status = ?, approval_status = ? WHERE complaint_id = ?',
+        ['In Progress', 'Approved', complaintId]
+    );
+
+    await db.query(
+        'UPDATE warden_complaints SET status = ? WHERE complaint_id = ?',
+        ['In Progress', complaintId]
+    );
+
     return { warden_complaint_id: result.insertId, message: 'Complaint escalated to warden.' };
 }
 
 async function addWardenLog(wardenComplaintId, update_text) {
+    // Insert progress update into complaint_logs
     const [result] = await db.query(
         'INSERT INTO complaint_logs (warden_complaint_id, update_text) VALUES (?, ?)',
         [wardenComplaintId, update_text]
     );
 
+    // Optionally, update the complaint status based on the log entry
+    await db.query(
+        'UPDATE complaints SET status = ? WHERE complaint_id = ?',
+        ['In Progress', wardenComplaintId]  // Change as needed based on the log content
+    );
+
     return { log_id: result.insertId, message: 'Progress update added successfully.' };
 }
+
 
 
 // Get all warden complaints
