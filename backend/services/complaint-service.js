@@ -74,28 +74,42 @@ async function updateComplaintStatus(complaintId, status) {
 }
 
 
-// Get all complaints
-async function getAllComplaints() {
-    const [rows] = await db.query(`
-        SELECT 
-            c.complaint_id,
-            c.category,
-            c.description,
-            c.status,
-            c.priority,
-            c.submitted_at,
-            c.approval_status,
-            c.assigned_to,
-            s.name AS student_name,
-            s.email AS student_email,
-            s.room_number
-        FROM complaints c
-        JOIN students s ON c.student_id = s.student_id
-        ORDER BY c.submitted_at DESC
-    `);
+export const getAllComplaints = async (role) => {
+    const connection = await db.getConnection();
+    try {
+        let query = `
+            SELECT 
+                c.complaint_id,
+                c.student_id,
+                s.name AS student_name,
+                c.category,
+                c.description,
+                c.submitted_at,
+                c.status,
+                c.priority,
+                c.approval_status,
+                c.assigned_to
+            FROM complaints c
+            JOIN students s ON c.student_id = s.student_id
+        `;
 
-    return rows;
-}
+        if (role === 'wing') {
+            query += ` WHERE c.approval_status = 'Pending'`;
+        } else if (role === 'prefect') {
+            query += ` WHERE c.approval_status = 'Approved'`;
+        }
+
+        query += ` ORDER BY c.submitted_at DESC`;
+
+        const [rows] = await connection.query(query);
+        return rows;
+    } catch (error) {
+        throw new Error('Failed to fetch complaints');
+    } finally {
+        connection.release();
+    }
+};
+
 
 
 async function processComplaint(complaintId, role, action, currentUserId) {
@@ -121,7 +135,7 @@ async function processComplaint(complaintId, role, action, currentUserId) {
         return { message: 'Complaint rejected.' };
     }
 
-    // ✅ If wing rep approves, do NOT escalate — just mark in progress
+    //  If wing rep approves, do NOT escalate — just mark in progress
     if (role === 'wing' && action === 'Approved') {
         await db.query(
             'UPDATE complaints SET approval_status = ?, status = ? WHERE complaint_id = ?',
@@ -158,7 +172,6 @@ async function processComplaint(complaintId, role, action, currentUserId) {
 }
 
 
-// In complaint-service.js
 
 // Escalate complaint to warden
 async function escalateToWarden(complaintId) {

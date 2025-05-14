@@ -59,6 +59,9 @@ const PrefectComplaintManagement = ({ complaints, onForwardToWarden, onResolveCo
         }
     };
 
+    // Filter complaints to show only those with 'Approved' status
+    const approvedComplaints = complaints.filter(complaint => complaint.approval_status === 'Approved');
+
     return (
         <div>
             <h3>Prefect Complaint Management</h3>
@@ -74,7 +77,7 @@ const PrefectComplaintManagement = ({ complaints, onForwardToWarden, onResolveCo
                     </tr>
                 </thead>
                 <tbody>
-                    {complaints.map(complaint => {
+                    {approvedComplaints.map(complaint => {
                         const wardenId = getWardenId(complaint.complaint_id);
 
                         return (
@@ -85,7 +88,8 @@ const PrefectComplaintManagement = ({ complaints, onForwardToWarden, onResolveCo
                                     <td>{complaint.category}</td>
                                     <td>{complaint.status}</td>
                                     <td>
-                                        {complaint.status === 'Pending' && (
+                                        {/* Show the button if status is 'In Progress' and approval_status is 'Approved' */}
+                                        {complaint.status === 'In Progress' && (
                                             <button onClick={() => handleForwardToWarden(complaint.complaint_id)}>
                                                 Forward to Warden
                                             </button>
@@ -133,3 +137,4 @@ const PrefectComplaintManagement = ({ complaints, onForwardToWarden, onResolveCo
 };
 
 export default PrefectComplaintManagement;
+

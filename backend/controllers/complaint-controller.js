@@ -43,14 +43,18 @@ export async function updateComplaintStatus(req, res) {
 
 // Get all complaints
 export async function getAllComplaints(req, res) {
+    const { role } = req.query; // e.g., ?role=wing or ?role=prefect
+    console.log(role);
+    
     try {
-        const complaints = await complaintService.getAllComplaints();
+        const complaints = await complaintService.getAllComplaints(role);
         return res.status(200).json(complaints);
     } catch (error) {
         console.error('Error fetching complaints:', error);
         return res.status(500).json({ message: 'Failed to fetch complaints' });
     }
 }
+
 
 // Process (approve/reject) complaint and escalate if necessary
 export async function processComplaint(req, res) {

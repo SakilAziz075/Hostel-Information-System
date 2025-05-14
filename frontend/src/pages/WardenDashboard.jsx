@@ -7,6 +7,10 @@ import RoomManagement from '../components/RoomManagement';
 import PrefectManagement from '../components/PrefectManagement'; // ✅ NEW Import
 import axios from 'axios';
 
+const role = 'warden'
+
+
+
 const WardenDashboard = () => {
     const [activeSection, setActiveSection] = useState('complaints');
     const [complaints, setComplaints] = useState([]);
@@ -19,13 +23,16 @@ const WardenDashboard = () => {
         room_end: ''
     });
     const [editWingId, setEditWingId] = useState(null);
+    const [studentsByRoom, setStudentsByRoom] = useState({});
 
     useEffect(() => {
-        axios.get('/api/students')
-            .then(res => setStudents(res.data))
-            .catch(err => console.error('Error loading students', err));
+        // axios.get('/api/students')
+        //     .then(res => setStudents(res.data))
+        //     .catch(err => console.error('Error loading students', err));
 
-        axios.get('http://localhost:5000/api/complaints')
+        axios.get('http://localhost:5000/api/complaints', {
+            params: { role: 'warden' } // Sending role as query parameter
+        })
             .then(res => setComplaints(res.data))
             .catch(err => console.error('Error loading complaints', err));
     }, []);
@@ -35,6 +42,20 @@ const WardenDashboard = () => {
             .then(res => setWings(res.data))
             .catch(err => console.error('Error loading wings', err));
     }, []);
+
+    useEffect(() => {
+        const fetchBoarders = async () => {
+            const res = await axios.get('http://localhost:5000/api/boarders/rooms-with-boarders');
+            console.log('firing room-with boarder');
+
+            console.log(res.data);
+
+            setStudentsByRoom(res.data);
+        };
+        fetchBoarders();
+    }, []);
+
+
 
     const currentIssues = complaints.filter(c => c.status !== 'Resolved');
     const resolvedIssues = complaints.filter(c => c.status === 'Resolved');
@@ -144,7 +165,7 @@ const WardenDashboard = () => {
 
                 {activeSection === 'boarders' && (
                     <BoarderList
-                        students={students}
+                        students={studentsByRoom}
                         onAdd={handleAddBoarder}
                         onRemove={handleRemoveBoarder}
                         onUpdate={handleUpdateBoarder}

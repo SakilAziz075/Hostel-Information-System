@@ -149,3 +149,26 @@ export const uploadBoarders = async (filePath) => {
     }
 };
 
+// Service function to get room and boarder information
+export const getBoardersByRoom = async () => {
+    const connection = await db.getConnection();
+    try {
+        const [rows] = await connection.query(`
+            SELECT 
+                r.room_number,
+                r.capacity,
+                r.current_occupants,
+                s.student_id,
+                s.name,
+                s.email
+            FROM rooms r
+            LEFT JOIN students s ON r.room_number = s.room_number
+            ORDER BY r.room_number ASC, s.name ASC
+        `);
+        return rows;
+    } catch (error) {
+        throw new Error('Failed to fetch boarders by room');
+    } finally {
+        connection.release();
+    }
+};

@@ -25,7 +25,9 @@ const PrefectDashboard = () => {
             .then(res => setStudents(res.data))
             .catch(err => console.error('Error loading students', err));
 
-        axios.get('http://localhost:5000/api/complaints')
+            axios.get('http://localhost:5000/api/complaints', {
+                params: { role: 'prefect' } // Sending role as query parameter
+            })
             .then(res => setComplaints(res.data))
             .catch(err => console.error('Error loading complaints', err));
     }, []);

@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { addBoarder, updateBoarder, removeBoarder, uploadBoarders } from '../controllers/boarders-controller.js';
+import { addBoarder, updateBoarder, removeBoarder, uploadBoarders ,getBoardersByRoom } from '../controllers/boarders-controller.js';
 
 const router = express.Router();
 
@@ -14,5 +14,7 @@ router.delete('/remove/:student_id', removeBoarder); // Remove a boarder
 
 // Route to handle file upload
 router.post('/upload', upload.single('file'), uploadBoarders); // Upload spreadsheet to add/update multiple boarders
+
+router.get('/rooms-with-boarders', getBoardersByRoom);
 
 export default router;

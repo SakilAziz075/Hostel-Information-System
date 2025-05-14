@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const BoarderList = ({ students, onAdd, onUpdate, onRemove, onUpload }) => {
+const BoarderList = ({ studentsByRoom, onAdd, onUpdate, onRemove, onUpload }) => {
     const [newBoarder, setNewBoarder] = useState({
         student_id: '',
         name: '',
@@ -31,15 +31,24 @@ const BoarderList = ({ students, onAdd, onUpdate, onRemove, onUpload }) => {
     return (
         <section>
             <h3>Boarders List</h3>
-            <ul>
-                {students.map(student => (
-                    <li key={student.student_id}>
-                        {student.name} - {student.email} (Room ID: {student.room_number})
-                        <button onClick={() => onRemove(student.student_id)}>Remove</button>
-                        <button onClick={() => onUpdate(student.student_id)}>Update</button>
-                    </li>
-                ))}
-            </ul>
+            {studentsByRoom.map(({ room_number, students }) => (
+                <div key={room_number}>
+                    <h4>Room {room_number}</h4>
+                    <ul>
+                        {students && students.length > 0 ? (
+                            students.map(student => (
+                                <li key={student.student_id}>
+                                    {student.name} - {student.email}
+                                    <button onClick={() => onRemove(student.student_id)}>Remove</button>
+                                    <button onClick={() => onUpdate(student.student_id)}>Update</button>
+                                </li>
+                            ))
+                        ) : (
+                            <p>No students available for this room.</p>
+                        )}
+                    </ul>
+                </div>
+            ))}
 
             <h4>Add New Boarder</h4>
             <input
