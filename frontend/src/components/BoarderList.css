@@ -1,51 +1,145 @@
-.room-container {
+.rooms-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-}
-
-.room {
-    padding: 15px;
-    border-radius: 5px;
-    color: white;
-    font-weight: bold;
-    width: 150px;
-    text-align: center;
+    gap: 12px;
+  }
+  
+  .room-box {
     cursor: pointer;
-}
-
-.vacant {
-    background-color: green;
-}
-
-.full {
-    background-color: red;
-}
-
-.modal {
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    width: 140px;
+    text-align: center;
+    user-select: none;
+    font-weight: 600;
+    font-size: 18px;
+    background-color: #d1e3f8; /* default light blue background */
+    transition: background-color 0.4s ease, color 0.4s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 50, 0.15);
+  }
+  
+  .room-box.empty {
+    background: #b3c7e6; /* soft pastel blue */
+    color: #1e2a78; /* dark blue text */
+  }
+  
+  .room-box.half-full {
+    background: #f9e2b3; /* soft pastel yellow/gold */
+    color: #7a5b00; /* dark mustard text */
+  }
+  
+  .room-box.full {
+    background: #e6a3a3; /* muted pastel red/pink */
+    color: #7a2a2a; /* dark red text */
+  }
+  
+  .room-box:hover.empty {
+    background: #9bb1db;
+  }
+  
+  .room-box:hover.half-full {
+    background: #f3d681;
+  }
+  
+  .room-box:hover.full {
+    background: #d97e7e;
+  }
+  
+  .modal-backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(10, 20, 50, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.modal-content {
-    background: white;
+    z-index: 9999;
+  }
+  
+  .modal-content {
+    background-color: #f5f9ff;
     padding: 20px;
     border-radius: 10px;
     width: 400px;
-    position: relative;
-}
-
-.close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 15px rgba(30, 60, 120, 0.3);
+  }
+  
+  .student-item {
+    margin-bottom: 12px;
+    color: #1e2a78;
+    font-weight: 500;
+  }
+  
+  .remove-btn, .add-btn, .close-btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
-}
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  
+  .remove-btn {
+    background-color: #b85c5c;
+    color: white;
+  }
+  
+  .remove-btn:hover {
+    background-color: #9b4747;
+  }
+  
+  .add-btn {
+    background-color: #5078d0;
+    color: white;
+    margin-top: 10px;
+    width: 100%;
+  }
+  
+  .add-btn:hover {
+    background-color: #3e60b0;
+  }
+  
+  .close-btn {
+    background-color: #c7d2e8;
+    color: #2f3a68;
+    margin-top: 15px;
+    width: 100%;
+  }
+  
+  .close-btn:hover {
+    background-color: #a4b0d4;
+  }
+  
+  .add-boarder-form input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+    font-size: 14px;
+    border: 1px solid #a3b0d5;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .add-boarder-form input:focus {
+    border-color: #5078d0;
+    outline: none;
+  }
+  .sort-toggle-btn {
+    padding: 8px 16px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: #5078d0;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sort-toggle-btn:hover {
+    background-color: #3e60b0;
+  }
+  
