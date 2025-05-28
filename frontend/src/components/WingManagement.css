@@ -1,0 +1,128 @@
+/* WingManagement.css */
+
+.wing-management {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.wing-management h3 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.wing-management .wing-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 30px;
+  justify-content: center;
+}
+
+.wing-management .wing-form input {
+  flex: 1 1 200px;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fdfdfd;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.wing-management .wing-form input:focus {
+  border-color: #1e88e5;
+  outline: none;
+}
+
+.wing-management .wing-form button {
+  padding: 10px 20px;
+  background-color: #1e88e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.wing-management .wing-form button:hover {
+  background-color: #1565c0;
+}
+
+.wing-management ul {
+  list-style: none;
+  padding: 0;
+}
+
+.wing-management ul li {
+  padding: 12px 16px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  color: #333;
+}
+
+.wing-management ul li strong {
+  color: #2c3e50;
+}
+
+.wing-management ul li button {
+  padding: 6px 14px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.wing-management ul li button:hover {
+  background-color: #388e3c;
+}
+/* WingManagement.css additions */
+
+.wing-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  flex-wrap: wrap;
+}
+
+.wing-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #333;
+}
+
+.edit-button {
+  padding: 6px 14px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.edit-button:hover {
+  background-color: #388e3c;
+}

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import './WingRepresentativeDashboard.css';
+
 import BoarderList from '../components/BoarderList';
 import WingComplaintManagement from '../components/WingComplaintManagement';
 import axios from 'axios';
