@@ -36,6 +36,7 @@ const WardenDashboard = () => {
             .then(res => setComplaints(res.data))
             .catch(err => console.error('Error loading complaints', err));
     }, []);
+    
 
     useEffect(() => {
         axios.get('/api/wings')

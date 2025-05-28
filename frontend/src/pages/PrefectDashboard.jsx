@@ -32,6 +32,9 @@ const PrefectDashboard = () => {
             .catch(err => console.error('Error loading complaints', err));
     }, []);
 
+    console.log('prefect page',complaints);
+    
+
     useEffect(() => {
         axios.get('/api/wings')
             .then(res => setWings(res.data))

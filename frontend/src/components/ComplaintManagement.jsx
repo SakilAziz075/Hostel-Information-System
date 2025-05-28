@@ -7,9 +7,10 @@ const WardenComplaintManagement = () => {
     const [newLog, setNewLog] = useState({});
     const [loadingLogs, setLoadingLogs] = useState({});
     const [logStatus, setLogStatus] = useState({});
+    const [visibleLogs, setVisibleLogs] = useState({}); // Track visibility of logs per complaint
 
     useEffect(() => {
-        fetch('/api/complaints/warden')  // Updated API endpoint for all warden complaints
+        fetch('/api/complaints/warden')  // Fetch all warden complaints
             .then(res => res.json())
             .then(setComplaints)
             .catch(err => console.error('Failed to fetch complaints:', err));
@@ -18,7 +19,7 @@ const WardenComplaintManagement = () => {
     const fetchLogs = async (id) => {
         setLoadingLogs(prev => ({ ...prev, [id]: true }));
         try {
-            const res = await fetch(`/api/complaints/${id}/logs`);  // Updated endpoint for fetching logs
+            const res = await fetch(`/api/complaints/${id}/logs`);  // Fetch logs for a complaint
             const data = await res.json();
             setLogs(prev => ({ ...prev, [id]: data }));
         } catch (err) {
@@ -28,13 +29,25 @@ const WardenComplaintManagement = () => {
         }
     };
 
+    const toggleLogs = async (id) => {
+        if (visibleLogs[id]) {
+            // Hide logs
+            setVisibleLogs(prev => ({ ...prev, [id]: false }));
+        } else {
+            // Show logs: fetch if not already fetched, then show
+            if (!logs[id]) {
+                await fetchLogs(id);
+            }
+            setVisibleLogs(prev => ({ ...prev, [id]: true }));
+        }
+    };
+
     const submitLog = async (id) => {
         const text = newLog[id]?.trim();
         if (!text) return;
 
         try {
             const res = await fetch(`/api/complaints/${id}/logs`, {
-                // Updated endpoint for submitting log
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ update_text: text })
@@ -65,46 +78,55 @@ const WardenComplaintManagement = () => {
                 <p>No complaints found.</p>
             ) : complaints.map(c => (
                 <div key={c.complaint_id} className="complaint-card">
-                    <h4><strong>Category: </strong>{c.category}</h4>
-                    <p>{c.description}</p>
-                    <p><strong>Priority:</strong> {c.priority}</p>
-                    <p><strong>Student:</strong> {c.student_name} ({c.student_roll})</p> {/* 👈 Add this line */}
+                    <h4><strong>Category: </strong>{c.category.toUpperCase()}</h4>
+                    <p>{c.description.toUpperCase()}</p>
+                    <p><strong>Priority:</strong> {c.priority.toUpperCase()}</p>
+                    <p><strong>Student:</strong> {c.student_name.toUpperCase()} ({c.student_roll.toUpperCase()})</p>
 
-                    <button className="log-button" onClick={() => fetchLogs(c.warden_complaint_id)}>
-                        {loadingLogs[c.warden_complaint_id] ? 'Loading logs...' : 'Show Logs'}
+                    <p><strong>Status:</strong> {c.status === 'Resolved' ? 'Resolved' : c.status}</p>
+
+                    <button className="log-button" onClick={() => toggleLogs(c.warden_complaint_id)}>
+                        {loadingLogs[c.warden_complaint_id]
+                            ? 'Loading logs...'
+                            : visibleLogs[c.warden_complaint_id] ? 'Hide Logs' : 'Show Logs'}
                     </button>
 
-                    <div className="logs-container">
-                        {loadingLogs[c.warden_complaint_id] ? null : (
-                            logs.hasOwnProperty(c.warden_complaint_id) ? (
-                                logs[c.warden_complaint_id].length > 0 ? (
+                    {visibleLogs[c.warden_complaint_id] && (
+                        <div className="logs-container">
+                            {loadingLogs[c.warden_complaint_id] ? null : (
+                                logs[c.warden_complaint_id]?.length > 0 ? (
                                     logs[c.warden_complaint_id].map(log => (
                                         <div key={`${c.warden_complaint_id}-${log.log_id}`} className="log-entry">
                                             📍 <em>{log.update_text}</em> <span className="log-time">({new Date(log.updated_at).toLocaleString()})</span>
                                         </div>
                                     ))
                                 ) : (
-                                    <p>No logs yet.</p>
+                                    <p style={{ fontStyle: 'italic', color: '#888' }}>No logs yet.</p>
                                 )
-                            ) : null
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    )}
 
+                    {c.status !== 'Resolved' ? (
+                        <>
+                            <textarea
+                                rows="2"
+                                placeholder="Add progress update..."
+                                className="log-textarea"
+                                value={newLog[c.warden_complaint_id] || ''}
+                                onChange={e => setNewLog(prev => ({ ...prev, [c.warden_complaint_id]: e.target.value }))}
+                            ></textarea>
 
-                    <textarea
-                        rows="2"
-                        placeholder="Add progress update..."
-                        className="log-textarea"
-                        value={newLog[c.warden_complaint_id] || ''}
-                        onChange={e => setNewLog(prev => ({ ...prev, [c.warden_complaint_id]: e.target.value }))}
-                    ></textarea>
+                            <button className="submit-button" onClick={() => submitLog(c.warden_complaint_id)}>
+                                Add Update
+                            </button>
 
-                    <button className="submit-button" onClick={() => submitLog(c.warden_complaint_id)}>
-                        Add Update
-                    </button>
-
-                    {logStatus[c.complaint_id] && (
-                        <p className="log-status">{logStatus[c.complaint_id]}</p>
+                            {logStatus[c.warden_complaint_id] && (
+                                <p className="log-status">{logStatus[c.warden_complaint_id]}</p>
+                            )}
+                        </>
+                    ) : (
+                        <p className="resolved-note">This complaint has been resolved. No further updates Needed.</p>
                     )}
                 </div>
             ))}

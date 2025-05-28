@@ -1,0 +1,51 @@
+.room-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.room {
+    padding: 15px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    width: 150px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.vacant {
+    background-color: green;
+}
+
+.full {
+    background-color: red;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
