@@ -89,17 +89,15 @@ CREATE TABLE lost_items (
 -- 7. NOTIFICATIONS
 CREATE TABLE notifications (
   notification_id INT AUTO_INCREMENT PRIMARY KEY,
-  recipient_id    VARCHAR(20)           NOT NULL,
-  lost_item_id    INT,
-  message_content TEXT,
-  created_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  is_read         BOOLEAN       NOT NULL DEFAULT FALSE,
-  FOREIGN KEY (recipient_id) REFERENCES students(student_id)
+  title           VARCHAR(255)     NOT NULL,
+  description     TEXT             NOT NULL,
+  pdf_path        VARCHAR(255),               -- Store the file path of the PDF
+  created_by      INT              NOT NULL,   -- FK to warden (users.user_id)
+  created_at      DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (created_by) REFERENCES users(user_id)
+    ON DELETE CASCADE
     ON UPDATE CASCADE
-    ON DELETE CASCADE,
-  FOREIGN KEY (lost_item_id) REFERENCES lost_items(lost_item_id)
-    ON UPDATE CASCADE
-    ON DELETE SET NULL
 );
 
 -- 8. USERS

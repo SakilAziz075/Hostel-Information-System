@@ -4,12 +4,8 @@ import WingManagement from '../components/WingManagement';
 import ComplaintManagement from '../components/ComplaintManagement';
 import BoarderList from '../components/BoarderList';
 import RoomManagement from '../components/RoomManagement';
-import PrefectManagement from '../components/PrefectManagement'; // ✅ NEW Import
+import PrefectManagement from '../components/PrefectManagement';
 import axios from 'axios';
-
-const role = 'warden'
-
-
 
 const WardenDashboard = () => {
     const [activeSection, setActiveSection] = useState('complaints');
@@ -25,18 +21,18 @@ const WardenDashboard = () => {
     const [editWingId, setEditWingId] = useState(null);
     const [studentsByRoom, setStudentsByRoom] = useState({});
 
-    useEffect(() => {
-        // axios.get('/api/students')
-        //     .then(res => setStudents(res.data))
-        //     .catch(err => console.error('Error loading students', err));
+    // Notice upload state (added title)
+    const [noticeTitle, setNoticeTitle] = useState('');
+    const [noticeDescription, setNoticeDescription] = useState('');
+    const [noticeFile, setNoticeFile] = useState(null);
 
+    useEffect(() => {
         axios.get('http://localhost:5000/api/complaints', {
-            params: { role: 'warden' } // Sending role as query parameter
+            params: { role: 'warden' }
         })
-            .then(res => setComplaints(res.data))
-            .catch(err => console.error('Error loading complaints', err));
+        .then(res => setComplaints(res.data))
+        .catch(err => console.error('Error loading complaints', err));
     }, []);
-    
 
     useEffect(() => {
         axios.get('/api/wings')
@@ -48,15 +44,11 @@ const WardenDashboard = () => {
         const fetchBoarders = async () => {
             const res = await axios.get('http://localhost:5000/api/boarders/rooms-with-boarders');
             console.log('firing room-with boarder');
-
             console.log(res.data);
-
             setStudentsByRoom(res.data);
         };
         fetchBoarders();
     }, []);
-
-
 
     const currentIssues = complaints.filter(c => c.status !== 'Resolved');
     const resolvedIssues = complaints.filter(c => c.status === 'Resolved');
@@ -145,6 +137,34 @@ const WardenDashboard = () => {
         }
     };
 
+    const handleNoticeUpload = async (e) => {
+        e.preventDefault();
+        if (!noticeFile || !noticeDescription || !noticeTitle) {
+            alert('Please provide a title, a PDF file, and a description.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', noticeTitle);
+        formData.append('description', noticeDescription);
+        formData.append('pdf', noticeFile);
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/notices/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            console.log('Upload success response:', response.data);
+            alert('Notice uploaded successfully');
+            setNoticeTitle('');
+            setNoticeDescription('');
+            setNoticeFile(null);
+        } catch (err) {
+            console.error('Failed to upload notice:', err);
+            alert('Upload failed.');
+        }
+        
+    };
+
     return (
         <div className="warden-dashboard">
             <h2>Welcome, Warden!</h2>
@@ -154,7 +174,8 @@ const WardenDashboard = () => {
                 <button onClick={() => setActiveSection('rooms')}>Room Management</button>
                 <button onClick={() => setActiveSection('boarders')}>Boarders List</button>
                 <button onClick={() => setActiveSection('wings')}>Wing Management</button>
-                <button onClick={() => setActiveSection('prefects')}>Prefect Management</button> {/* ✅ Added */}
+                <button onClick={() => setActiveSection('prefects')}>Prefect Management</button>
+                <button onClick={() => setActiveSection('notices')}>Upload Notice</button>
             </nav>
 
             <div className="dashboard-content">
@@ -185,8 +206,35 @@ const WardenDashboard = () => {
                     />
                 )}
 
-                {activeSection === 'prefects' && (
-                    <PrefectManagement />
+                {activeSection === 'prefects' && <PrefectManagement />}
+
+                {activeSection === 'notices' && (
+                    <div className="notice-upload-section">
+                        <h3>Upload Notice</h3>
+                        <form onSubmit={handleNoticeUpload} className="notice-form">
+                            <input
+                                type="text"
+                                placeholder="Enter notice title"
+                                value={noticeTitle}
+                                onChange={(e) => setNoticeTitle(e.target.value)}
+                                required
+                            />
+                            <textarea
+                                placeholder="Enter notice description"
+                                value={noticeDescription}
+                                onChange={(e) => setNoticeDescription(e.target.value)}
+                                rows="3"
+                                required
+                            />
+                            <input
+                                type="file"
+                                accept="application/pdf"
+                                onChange={(e) => setNoticeFile(e.target.files[0])}
+                                required
+                            />
+                            <button type="submit">Upload</button>
+                        </form>
+                    </div>
                 )}
             </div>
         </div>

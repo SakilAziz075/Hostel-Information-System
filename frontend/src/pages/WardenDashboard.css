@@ -86,3 +86,35 @@
 .dashboard-content section {
     margin-top: 10px;
 }
+.notice-upload-section {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 10px;
+    background: #f9f9f9;
+    max-width: 500px;
+    margin: 1rem auto;
+}
+
+.notice-upload-section h3 {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.notice-form textarea {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+}
+
+.notice-form input[type="file"] {
+    margin-bottom: 1rem;
+}
+
+.notice-form button {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
