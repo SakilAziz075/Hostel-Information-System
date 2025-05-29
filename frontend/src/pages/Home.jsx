@@ -25,9 +25,19 @@ const Home = () => {
       console.error('No file URL provided');
       return;
     }
-    const fullUrl = `http://localhost:5000${fileUrl}`;
-    window.open(fullUrl, '_blank');
+    const urlParts = fileUrl.split('/');
+    const filename = urlParts[urlParts.length - 1];
+  
+    const downloadUrl = `http://localhost:5000/api/notices/download/${filename}`;
+  
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+  
 
   return (
     <div className="home-container">
