@@ -36,6 +36,8 @@ const WingRepresentativeDashboard = () => {
                         c.approval_status === 'Pending'
                 );
                 setComplaints(assigned);
+                console.log('assign' ,assigned);
+                
             } catch (err) {
                 console.error('Error fetching complaints:', err);
             }

@@ -6,7 +6,7 @@ const PrefectComplaintManagement = ({ complaints, onForwardToWarden, onResolveCo
     const [loadingLogs, setLoadingLogs] = useState({});
     const [wardenComplaints, setWardenComplaints] = useState([]);
     const [logsFetched, setLogsFetched] = useState({});
-    const [visibleLogs, setVisibleLogs] = useState({}); // Track visibility of logs per complaint
+    const [visibleLogs, setVisibleLogs] = useState({});
 
     useEffect(() => {
         const fetchWardenComplaints = async () => {
@@ -44,10 +44,8 @@ const PrefectComplaintManagement = ({ complaints, onForwardToWarden, onResolveCo
         if (!wardenComplaintId) return;
 
         if (visibleLogs[wardenComplaintId]) {
-            // Currently visible — hide logs
             setVisibleLogs(prev => ({ ...prev, [wardenComplaintId]: false }));
         } else {
-            // Not visible — fetch if needed, then show logs
             if (!logsFetched[wardenComplaintId]) {
                 await fetchLogs(wardenComplaintId);
             }
@@ -79,97 +77,133 @@ const PrefectComplaintManagement = ({ complaints, onForwardToWarden, onResolveCo
 
     const approvedComplaints = complaints.filter(complaint => complaint.approval_status === 'Approved');
 
-    const cellStyle = {
-        border: '1px solid #ccc',
-        padding: '8px',
-        textAlign: 'left'
-    };
-
     return (
-        <div>
-            <h3>Prefect Complaint Management</h3>
-            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-                <thead>
-                    <tr>
-                        <th style={cellStyle}>Complaint ID</th>
-                        <th style={cellStyle}>Student Name</th>
-                        <th style={cellStyle}>Category</th>
-                        <th style={cellStyle}>Status</th>
-                        <th style={cellStyle}>Actions</th>
-                        <th style={cellStyle}>Logs</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {approvedComplaints.map(complaint => {
-                        const wardenId = getWardenId(complaint.complaint_id);
-                        const isEscalated = !!wardenId;
+        <div style={{ padding: '1rem' }}>
+            <h3 style={{ marginBottom: '1rem' }}>📋 Prefect Complaint Management</h3>
+            <div style={{ border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead style={{ backgroundColor: '#f8f8f8' }}>
+                        <tr>
+                            <th style={thStyle}>ID</th>
+                            <th style={thStyle}>Student</th>
+                            <th style={thStyle}>Category</th>
+                            <th style={thStyle}>Status</th>
+                            <th style={thStyle}>Actions</th>
+                            <th style={thStyle}>Logs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {approvedComplaints.map(complaint => {
+                            const wardenId = getWardenId(complaint.complaint_id);
+                            const isEscalated = !!wardenId;
+                            let displayStatus = complaint.status;
+                            if (complaint.status === 'In Progress' && isEscalated) {
+                                displayStatus = 'In Progress (Escalated)';
+                            }
 
-                        let displayStatus = complaint.status;
-                        if (complaint.status === 'In Progress' && isEscalated) {
-                            displayStatus = 'In Progress (Escalated to Warden)';
-                        }
+                            return (
+                                <React.Fragment key={complaint.complaint_id}>
+                                    <tr style={{ borderBottom: '1px solid #eee' }}>
+                                        <td style={tdStyle}>{complaint.complaint_id}</td>
+                                        <td style={tdStyle}>{complaint.student_name}</td>
+                                        <td style={tdStyle}>{complaint.category}</td>
+                                        <td style={tdStyle}>{displayStatus}</td>
+                                        <td style={tdStyle}>
+                                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                {!isEscalated && complaint.status === 'In Progress' && (
+                                                    <button style={btnBlue} onClick={() => handleForwardToWarden(complaint.complaint_id)}>
+                                                        Forward
+                                                    </button>
+                                                )}
+                                                {complaint.status !== 'Resolved' && (
+                                                    <button style={btnGreen} onClick={() => handleResolveComplaint(complaint.complaint_id)}>
+                                                        Resolve
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td style={tdStyle}>
+                                            {isEscalated ? (
+                                                <button style={btnGray} onClick={() => toggleLogs(wardenId)}>
+                                                    {loadingLogs[wardenId]
+                                                        ? 'Loading...'
+                                                        : visibleLogs[wardenId] ? 'Hide Logs' : 'Show Logs'}
+                                                </button>
+                                            ) : (
+                                                <span style={{ color: '#aaa' }}>Not escalated</span>
+                                            )}
+                                        </td>
+                                    </tr>
 
-                        return (
-                            <React.Fragment key={complaint.complaint_id}>
-                                <tr>
-                                    <td style={cellStyle}>{complaint.complaint_id}</td>
-                                    <td style={cellStyle}>{complaint.student_name}</td>
-                                    <td style={cellStyle}>{complaint.category}</td>
-                                    <td style={cellStyle}>{displayStatus}</td>
-                                    <td style={cellStyle}>
-                                        {!isEscalated && complaint.status === 'In Progress' && (
-                                            <button onClick={() => handleForwardToWarden(complaint.complaint_id)}>
-                                                Forward to Warden
-                                            </button>
-                                        )}
-                                        {complaint.status !== 'Resolved' && (
-                                            <button onClick={() => handleResolveComplaint(complaint.complaint_id)}>
-                                                Resolve
-                                            </button>
-                                        )}
-                                    </td>
-                                    <td style={cellStyle}>
-                                        {isEscalated ? (
-                                            <button onClick={() => toggleLogs(wardenId)}>
-                                                {loadingLogs[wardenId]
-                                                    ? 'Loading...'
-                                                    : visibleLogs[wardenId] ? 'Hide Logs' : 'Show Logs'}
-                                            </button>
-                                        ) : (
-                                            <span style={{ color: '#888' }}>Not escalated</span>
-                                        )}
-                                    </td>
-                                </tr>
-
-                                {isEscalated && visibleLogs[wardenId] && logsFetched[wardenId] && (
-                                    <tr>
-                                        <td colSpan="6" style={cellStyle}>
-                                            <div style={{ marginTop: '5px', paddingLeft: '10px' }}>
-                                                {logs[wardenId] && logs[wardenId].length > 0 ? (
-                                                    logs[wardenId].map(log => (
-                                                        <div key={log.log_id}>
-                                                            📍 <em>{log.update_text}</em>{' '}
-                                                            <span style={{ fontSize: '0.85em', color: '#555' }}>
-                                                                ({new Date(log.updated_at).toLocaleString()})
-                                                            </span>
-                                                        </div>
-                                                    ))
+                                    {isEscalated && visibleLogs[wardenId] && logsFetched[wardenId] && (
+                                        <tr>
+                                            <td colSpan="6" style={{ backgroundColor: '#fafafa', padding: '1rem' }}>
+                                                {logs[wardenId]?.length > 0 ? (
+                                                    <ul style={{ paddingLeft: '1.2rem' }}>
+                                                        {logs[wardenId].map(log => (
+                                                            <li key={log.log_id}>
+                                                                <em>{log.update_text}</em>
+                                                                <span style={{ color: '#666', fontSize: '0.85em', marginLeft: '0.5rem' }}>
+                                                                    ({new Date(log.updated_at).toLocaleString()})
+                                                                </span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
                                                 ) : (
                                                     <div style={{ fontStyle: 'italic', color: '#888' }}>
                                                         No logs available.
                                                     </div>
                                                 )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </React.Fragment>
-                        );
-                    })}
-                </tbody>
-            </table>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
+};
+
+const thStyle = {
+    padding: '12px',
+    textAlign: 'left',
+    borderBottom: '2px solid #ddd',
+    backgroundColor: '#f2f2f2'
+};
+
+const tdStyle = {
+    padding: '12px',
+    verticalAlign: 'top'
+};
+
+const btnBlue = {
+    backgroundColor: '#007BFF',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '6px 10px',
+    cursor: 'pointer'
+};
+
+const btnGreen = {
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '6px 10px',
+    cursor: 'pointer'
+};
+
+const btnGray = {
+    backgroundColor: '#6c757d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '6px 10px',
+    cursor: 'pointer'
 };
 
 export default PrefectComplaintManagement;
