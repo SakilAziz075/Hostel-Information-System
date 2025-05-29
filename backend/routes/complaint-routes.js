@@ -7,7 +7,8 @@ import {
     escalateComplaint,
     addWardenLog,
     getWardenLogs,
-    getAllWardenComplaints
+    getAllWardenComplaints,
+    getComplaintsByStudentId
 } from '../controllers/complaint-controller.js';
 
 const router = Router();
@@ -20,5 +21,6 @@ router.put('/:id/escalate', escalateComplaint);
 router.post('/:id/logs', addWardenLog);
 router.get('/:id/logs', getWardenLogs);
 router.get('/warden', getAllWardenComplaints);
+router.get('/complaints/student/:student_id', getComplaintsByStudentId);
 
 export default router;

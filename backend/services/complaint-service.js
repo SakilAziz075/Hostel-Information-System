@@ -252,6 +252,42 @@ async function getWardenLogs(wardenComplaintId) {
     return logs;
 }
 
+async function getComplaintsByStudentId(student_id) {
+    // 1. Fetch complaints by this student
+    const [complaints] = await db.query(`
+        SELECT 
+            c.complaint_id,
+            c.category,
+            c.description,
+            c.submitted_at,
+            c.status,
+            c.priority,
+            c.approval_status,
+            c.assigned_to,
+            wc.warden_complaint_id
+        FROM complaints c
+        LEFT JOIN warden_complaints wc ON c.complaint_id = wc.complaint_id
+        WHERE c.student_id = ?
+        ORDER BY c.submitted_at DESC
+    `, [student_id]);
+
+    // 2. For complaints escalated to warden (have warden_complaint_id), fetch logs
+    for (const complaint of complaints) {
+        if (complaint.warden_complaint_id) {
+            const [logs] = await db.query(
+                'SELECT log_id, update_text, updated_at FROM complaint_logs WHERE warden_complaint_id = ? ORDER BY updated_at DESC',
+                [complaint.warden_complaint_id]
+            );
+            complaint.warden_logs = logs;
+        } else {
+            complaint.warden_logs = [];
+        }
+    }
+
+    return complaints;
+}
+
+
 
 export default {
     submitComplaint,
@@ -261,5 +297,6 @@ export default {
     escalateToWarden,
     addWardenLog,
     getAllWardenComplaints,
-    getWardenLogs
+    getWardenLogs,
+    getComplaintsByStudentId
 };
