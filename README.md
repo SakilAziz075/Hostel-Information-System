@@ -155,3 +155,32 @@ npm run dev
 
 ![Public Notice Board](https://github.com/user-attachments/assets/3fc6d2fa-d802-447f-8a9f-2fa9292c95b9)  
 *Figure: Public-facing landing page showing all uploaded notices*
+
+
+## Future Scope
+
+The following modules and enhancements are planned for upcoming versions of the Hostel Information System:
+
+- 🧾 **Asset Tracking and Maintenance Logging**  
+  Tables for hostel assets and maintenance logs already exist. These will be used to:
+  - Maintain records of furniture, appliances, and shared resources
+  - Track resolution timelines and vendor/service history
+
+- 🔍 **Lost and Found Module**  
+  A centralized lost and found system will allow:
+  - Students to report or search for lost items across hostels
+  - Hostel admins to review, moderate, and publish verified reports
+  > *Note: The database table is provisioned, but the module was not completed due to time constraints.*
+
+- 🔁 **Room Change Request System**  
+  A workflow-based interface where:
+  - Students can raise room change requests with reasons
+  - Status tracking and notifications are automated
+
+- 💳 **Integrated Payment Gateway**  
+  To simplify mess fee payments by integrating:
+  - UPI, card, and net banking options
+  - Auto-generated receipts and transaction logs
+---
+
+> These additions aim to make the system more robust, transparent, and helpful for both students and hostel administrators.
