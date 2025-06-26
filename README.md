@@ -54,7 +54,9 @@
   - 🔵 Blue: 2 vacant
   - 🟡 Yellow: 1 vacant
   - 🔴 Red: full
- ![Room View](https://github.com/user-attachments/assets/96f4f146-8b99-40cb-a3f3-3e5cf191bc00)
+
+![Room View](https://github.com/user-attachments/assets/96f4f146-8b99-40cb-a3f3-3e5cf191bc00)
+
 - On selecting a room, a modal opens showing current boarders along with options to add or remove boarders. This interface is accessible to both prefects and the warden
   
  ![add_remove_boarder](https://github.com/user-attachments/assets/0ebe2cbc-52d4-4cd7-90b5-1d7f3d3b50b3)
